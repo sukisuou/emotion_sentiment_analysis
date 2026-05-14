@@ -2,7 +2,7 @@
 ### Group Members: Adam Idlan, Adam Hakimi, Adam Iskandar
 
 ## Directory:
-1) `emotion_hf.py` : data processing, regex filtering and pipelining for training
+1) `emotion_hf.py` : data processing, regex filtering and pipelining for training (may contain profanities)
 2) `emotion_train.py` : MLP model training with Tensorflow, Keras and ScikitLearn, with TF-IDF text vectorization
 3) `app/main.py` : main code for deployment
 4) `app/emotion_dataset.pkl` : cleaned up dataset for training
