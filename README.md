@@ -1,4 +1,4 @@
-# NLP PROJECT Year 2 Semester 2 : Emotion Sentiment Analysis
+# NLP PROJECT : Emotion Sentiment Analysis
 ### Group Members: Adam Idlan, Adam Hakimi, Adam Iskandar
 
 ## Directory:
