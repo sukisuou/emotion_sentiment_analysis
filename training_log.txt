@@ -1,0 +1,15 @@
+Stopped at epoch: 10
+
+--- Training Scores ---
+accuracy: 0.9684
+f1_score: 0.5485
+loss: 0.0579
+precision: 0.7010
+recall: 0.4323
+
+--- Evaluation Scores ---
+val_accuracy: 0.9577
+val_f1_score: 0.3972
+val_loss: 0.1323
+val_precision: 0.4870
+val_recall: 0.3119
