@@ -1,6 +1,9 @@
 # ---------- Part 1 : Import Dataset ----------
 import random
 from datasets import load_dataset
+import os
+import dotenv
+dotenv.load_dotenv()
 dataset = load_dataset("google-research-datasets/go_emotions")
 
 # get the necessary data and labels
@@ -10,7 +13,8 @@ random.shuffle(data)
 
 # filter the data using regular expressions
 import re
-bad_words = ["fuck", "fucking", "fucked", "fucker", "fucks", "shit", "shitty", "shitting", "shited", "bitch", "bitches", "bitched", "damn", "damned", "goddamn", "asshole", "ass", "bastard", "penis", "vagina", "dick", "cock", "pussy", "ballsack", "clitoris", "cum", "ejaculate", "porn", "pornography", "fetish", "erotic", "retard", "cunt", "slut", "whore", "twat", "fag", "faggot", "nigga", "nigger", "negro", "chink", "spic", "dyke"]
+bad_words_string = os.getenv("BAD_WORDS").strip() # .env structure -> BAD_WORDS=word1, word2, ...
+bad_words = bad_words_string.split(", ")
 profanity_filter = re.compile(r'\b(' + '|'.join(map(re.escape, bad_words)) + r')\b', flags = re.IGNORECASE)
 
 safe_data = []
