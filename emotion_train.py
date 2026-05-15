@@ -4,7 +4,6 @@ from tensorflow.keras.layers import Input, Dense, LeakyReLU, Dropout, BatchNorma
 from tensorflow.keras.metrics import BinaryAccuracy, Precision, Recall, F1Score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MultiLabelBinarizer
-from sklearn.utils.class_weight import compute_sample_weight
 import numpy as np
 
 # import data
@@ -12,7 +11,7 @@ import pickle
 with open('app/emotion_dataset.pkl', 'rb') as file:
     data_pipeline = pickle.load(file)
 
-data = data_pipeline['safe_data']
+data = data_pipeline['data']
 emotion_labels = data_pipeline['emotion_labels']
 
 # prepare the data
@@ -23,21 +22,39 @@ y = mlb.fit_transform(raw_labels)
 
 # split data
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size = 0.1, random_state = 42
+    X, y, test_size = 0.2, random_state = 42
 )
 X_train = np.array(X_train, dtype = object)
 X_test = np.array(X_test, dtype = object)
 y_train = np.array(y_train, dtype = np.int32)
 y_test = np.array(y_test, dtype = np.int32)
 
-# vectorize each words using tf-idf
-max_tokens = 5000
+# vectorize text using tf-idf unigram/bigram features
+max_tokens = 8000
 tfidf_layer = TextVectorization(
     max_tokens = max_tokens,
     output_mode = 'tf_idf',
     ngrams = (1, 2)
 )
 tfidf_layer.adapt(X_train)
+
+# use class weighting to make the dataset more balanced - boost rare classes weights, keep normal classes weights
+label_counts = y_train.sum(axis = 0)
+total_samples = y_train.shape[0]
+label_counts = np.maximum(label_counts, 1)  # avoid div by 0
+multiplier = 1.5    # strength of positive weights
+
+positive_weights = multiplier * total_samples / (len(emotion_labels) * label_counts)
+positive_weights = tf.constant(positive_weights, dtype = tf.float32)
+
+# calculate bce with weighted classes
+def weighted_binary_crossentropy(y_true, y_pred):
+    y_true = tf.cast(y_true, tf.float32)
+    
+    bce = tf.keras.backend.binary_crossentropy(y_true, y_pred)
+    weights = y_true * positive_weights + (1.0 - y_true)    # wi = N / Cni
+
+    return tf.reduce_mean(bce * weights)
 
 # build MLP model
 model = tf.keras.Sequential([
@@ -63,8 +80,11 @@ model = tf.keras.Sequential([
     Dense(len(emotion_labels), activation = 'sigmoid', name = 'output')
 ])
 model.compile(
-    optimizer = 'adam',
-    loss = 'binary_crossentropy',
+    optimizer = tf.keras.optimizers.AdamW(  # use adamw for weight decay
+        learning_rate = 5e-4,
+        weight_decay = 1e-4
+    ),
+    loss = weighted_binary_crossentropy,    # use own function
     metrics = [
         BinaryAccuracy(name = 'accuracy'),
         Precision(name = 'precision'),
@@ -75,47 +95,39 @@ model.compile(
 
 # add early stopping to avoid overfitting
 early_stopping = tf.keras.callbacks.EarlyStopping(
-    monitor = 'val_loss',
-    patience = 5,
+    monitor = 'val_f1_score',
+    mode = 'max',
+    patience = 7,
     restore_best_weights = True
 )
-
-# use class weighting to make the dataset more balanced
-sample_weights = compute_sample_weight('balanced', y = y_train.argmax(axis = 1))
 model.summary()
 
 # train model 
 print('Training model...')
 history = model.fit(
     X_train, y_train,
-    epochs = 15,
-    batch_size = 32,
+    epochs = 50,
+    batch_size = 64,
     verbose = False,
     validation_data = (X_test, y_test),
-    callbacks = [early_stopping],
-    sample_weight = sample_weights
+    callbacks = [early_stopping]
 )
 print('Training done!')
 
 # evaluate model's metrics
 history_dict = list(history.history.items())
-mid = len(history_dict) // 2
 with open('training_log.txt', 'w') as file:     # save in a file
     file.write(f"Stopped at epoch: {len(history.history['loss'])}\n")
     file.write('\n--- Training Scores ---\n')
-    for metrics_name, score in history_dict[:mid]:
-        file.write(f'{metrics_name}: {score[-1]:.4f}\n')
+    for metrics_name, score in history_dict:
+        if not metrics_name.startswith('val_'):
+            file.write(f'{metrics_name}: {score[-1]:.4f}\n')
     file.write('\n--- Evaluation Scores ---\n')
-    for metrics_name, score in history_dict[mid:]:
-        file.write(f'{metrics_name}: {score[-1]:.4f}\n')
+    for metrics_name, score in history_dict:
+        if metrics_name.startswith('val_'):
+            file.write(f'{metrics_name}: {score[-1]:.4f}\n')
 with open('training_log.txt', 'r') as file:     # print to terminal
     print(file.read())
 
 # save model
 model.export('app/emotion_model')
-
-
-# ---------- note to fine tune ----------
-# 1) max tokens
-# 2) F1-score too low
-# 3) 

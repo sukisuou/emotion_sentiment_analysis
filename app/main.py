@@ -18,9 +18,16 @@ def predict(texts):
 
 # ----- test inputs -----
 texts = [
-    "Omg I am so incredibly happy for you!! Congratulations!",
-    "I'm not sure about this choice, it seems pretty risky and dangerous.",
-    "This makes me so angry, I can't believe they did that again."
+    "Holy shit, this is the best thing that's happened to me all year.",
+    "Wow, amazing job ruining everything again.",
+    "I miss her so much it physically hurts sometimes.",
+    "I'm proud of you, seriously. You worked so damn hard for this.",
+    "This is fine. Everything is totally fine.",
+    "I don't know whether to laugh or cry anymore.",
+    "Dude, that's actually fucking hilarious.",
+    "I'm really nervous about tomorrow but also kinda excited.",
+    "I can't believe they forgot my birthday again.",
+    "Honestly? That was disgusting and disappointing."
 ]
 
 # predict

@@ -2,34 +2,39 @@
 import random
 from datasets import load_dataset
 dataset = load_dataset("google-research-datasets/go_emotions")
+random.seed(42)
 
 # get the necessary data and labels
 data = list(zip(dataset['train']['text'], dataset['train']['labels']))
 emotion_labels = dataset['train'].features['labels'].feature.names
+
+# remove data with empty labels
+data = [(text, labels) for text, labels in data if len(labels) > 0]
+
+# undersample 'neutral' labels (~28% total data, too skewed)
+neutral = []
+others = []
+neutral_idx = emotion_labels.index('neutral')
+
+for text, labels in data:
+    if labels == [neutral_idx]:     # remove pure neutral only
+        neutral.append((text, labels))
+    else:
+        others.append((text, labels))
+random.shuffle(neutral)
+
+neutral = neutral[:len(neutral) // 2]  # cut in half
+data = neutral + others
 random.shuffle(data)
 
-# filter the data using regular expressions
-import re
-bad_words = ["fuck", "fucking", "fucked", "fucker", "fucks", "shit", "shitty", "shitting", "shited", "bitch", "bitches", "bitched", "damn", "damned", "goddamn", "asshole", "ass", "bastard", "penis", "vagina", "dick", "cock", "pussy", "ballsack", "clitoris", "cum", "ejaculate", "porn", "pornography", "fetish", "erotic", "retard", "cunt", "slut", "whore", "twat", "fag", "faggot", "nigga", "nigger", "negro", "chink", "spic", "dyke"]
-profanity_filter = re.compile(r'\b(' + '|'.join(map(re.escape, bad_words)) + r')\b', flags = re.IGNORECASE)
-
-safe_data = []
-for text, labels in data:
-    if len(labels) == 0:
-        continue
-    
-    if profanity_filter.search(text):
-        continue
-
-    safe_data.append((text, labels))
-
-# review data
-print(f'Dataset size: {len(safe_data)}')
-for (text, labels) in safe_data[:5]:
+# preview data
+print(f'Dataset size: {len(data)}')
+for (text, labels) in data[:5]:
     print(f"Text: {text}\nLabels: {[emotion_labels[i] for i in labels]}\n")
 
+# review data distribution
 from collections import Counter
-all_labels = [label for text, labels in safe_data for label in labels]
+all_labels = [label for text, labels in data for label in labels]
 label_counts = Counter(all_labels)
 total_labels = len(all_labels)
 
@@ -44,7 +49,7 @@ with open('data_dist.txt', 'r') as file:
 
 # save data
 dataset_pipeline = {
-    'safe_data': safe_data,
+    'data': data,
     'emotion_labels': emotion_labels
 }
 import pickle
