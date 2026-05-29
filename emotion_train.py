@@ -42,7 +42,7 @@ tfidf_layer.adapt(X_train)
 label_counts = y_train.sum(axis = 0)
 total_samples = y_train.shape[0]
 label_counts = np.maximum(label_counts, 1)  # avoid div by 0
-multiplier = 1.5    # strength of positive weights
+multiplier = 1.2    # strength of positive weights
 
 positive_weights = multiplier * total_samples / (len(emotion_labels) * label_counts)
 positive_weights = tf.constant(positive_weights, dtype = tf.float32)
@@ -52,7 +52,7 @@ def weighted_binary_crossentropy(y_true, y_pred):
     y_true = tf.cast(y_true, tf.float32)
     
     bce = tf.keras.backend.binary_crossentropy(y_true, y_pred)
-    weights = y_true * positive_weights + (1.0 - y_true)    # wi = N / Cni
+    weights = y_true * positive_weights + (1.0 - y_true)
 
     return tf.reduce_mean(bce * weights)
 
@@ -106,8 +106,8 @@ model.summary()
 print('Training model...')
 history = model.fit(
     X_train, y_train,
-    epochs = 50,
-    batch_size = 64,
+    epochs = 25,
+    batch_size = 32,
     verbose = False,
     validation_data = (X_test, y_test),
     callbacks = [early_stopping]

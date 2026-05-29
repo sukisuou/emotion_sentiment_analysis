@@ -11,27 +11,24 @@ emotion_labels = data_pipeline['emotion_labels']
 # load the model
 model = tf.saved_model.load('emotion_model')
 
-# create a function for predicting
+# create a module for predicting
 def predict(texts):
     texts_arr = np.array(texts, dtype = object)
     return model.serve(texts_arr).numpy()
 
 # ----- test inputs -----
 texts = [
-    "Holy shit, this is the best thing that's happened to me all year.",
-    "Wow, amazing job ruining everything again.",
     "I miss her so much it physically hurts sometimes.",
-    "I'm proud of you, seriously. You worked so damn hard for this.",
+    "I'm proud of you, seriously. You worked so hard for this.",
     "This is fine. Everything is totally fine.",
     "I don't know whether to laugh or cry anymore.",
-    "Dude, that's actually fucking hilarious.",
     "I'm really nervous about tomorrow but also kinda excited.",
     "I can't believe they forgot my birthday again.",
     "Honestly? That was disgusting and disappointing."
 ]
 
 # predict
-print('Predicting emotions...')
+print('Analysing comment...')
 predictions = predict(texts)
 
 # show results
@@ -41,7 +38,7 @@ for text, probs in zip(texts, predictions):
     print('-' * 70)
     print(text)
     print('-' * 70)
-    print('Detected emotions:')
+    print('Result:')
 
     # check all the possible emotions
     found_any = False

@@ -1,0 +1,4 @@
+--- Main Label Distribution ---
+positive: 17410 (43.40%)
+ambiguous: 12864 (32.07%)
+negative: 9839 (24.53%)
