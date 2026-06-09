@@ -1,0 +1,36 @@
+--- Evaluation Scores ---
+Accuracy:  0.5297
+Precision: 0.6769
+Recall:    0.5651
+F1 Score:  0.6160
+
+--- Classification Report ---
+              precision    recall  f1-score   support
+
+    positive       0.78      0.72      0.75      2219
+    negative       0.65      0.46      0.54      1241
+   ambiguous       0.50      0.41      0.45       624
+     neutral       0.61      0.50      0.55      1766
+
+   micro avg       0.68      0.57      0.62      5850
+   macro avg       0.64      0.52      0.57      5850
+weighted avg       0.67      0.57      0.61      5850
+ samples avg       0.59      0.58      0.58      5850
+
+--- Multilabel Confusion Matrix ---
+
+positive
+[[2761  446]
+ [ 623 1596]]
+
+negative
+[[3871  314]
+ [ 667  574]]
+
+ambiguous
+[[4548  254]
+ [ 367  257]]
+
+neutral
+[[3096  564]
+ [ 887  879]]

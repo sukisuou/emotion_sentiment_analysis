@@ -11,22 +11,6 @@ emotion_labels = dataset['train'].features['labels'].feature.names
 # remove data with empty labels
 data = [(text, labels) for text, labels in data if len(labels) > 0]
 
-# undersample 'neutral' labels (~28% total data, too skewed)
-neutral = []
-others = []
-neutral_idx = emotion_labels.index('neutral')
-
-for text, labels in data:
-    if labels == [neutral_idx]:     # remove pure neutral only
-        neutral.append((text, labels))
-    else:
-        others.append((text, labels))
-random.shuffle(neutral)
-
-neutral = neutral[:len(neutral) // 2]  # cut in half
-data = neutral + others
-random.shuffle(data)
-
 # preview data
 print(f'Dataset size: {len(data)}')
 for (text, labels) in data[:5]:
@@ -47,7 +31,7 @@ with open('data_dist.txt', 'w') as file:
 with open('data_dist.txt', 'r') as file:
     print(file.read())
 
-# group data together into 3 big labels - positive, negative, ambiguous
+# group data together into 4 big labels - positive, negative, ambiguous, neutral
 positive_emotions = {
     'admiration', 'amusement', 'approval', 'caring', 'desire',
     'excitement', 'gratitude', 'joy', 'love', 'optimism',
@@ -59,24 +43,27 @@ negative_emotions = {
     'sadness'
 }
 ambiguous_emotions = {
-    'confusion', 'curiosity', 'realization', 'surprise', 'neutral'
+    'confusion', 'curiosity', 'realization', 'surprise'
+}
+neutral_emotions = {
+    'neutral'
 }
 grouped_data = []
-main_labels = ['positive', 'negative', 'ambiguous']
+main_labels = ['positive', 'negative', 'ambiguous', 'neutral']
+emotion_groups = [positive_emotions, negative_emotions, ambiguous_emotions, neutral_emotions]
 
 for text, labels in data:
     grouped_labels = set()
     for label_idx in labels:
         emotion_name = emotion_labels[label_idx]
 
-        if emotion_name in positive_emotions:
-            grouped_labels.add(0)
-        elif emotion_name in negative_emotions:
-            grouped_labels.add(1)
-        elif emotion_name in ambiguous_emotions:
-            grouped_labels.add(2)
+        for group_idx, emotion_group in enumerate(emotion_groups):
+            if emotion_name in emotion_group:
+                grouped_labels.add(group_idx)
+                break
     
     grouped_data.append((text, sorted(list(grouped_labels))))
+random.shuffle(grouped_data)    # shuffle
 
 # review data distribution
 from collections import Counter
@@ -85,7 +72,7 @@ main_label_counts = Counter(all_main_labels)
 total_main_labels = len(all_main_labels)
 
 with open('label_dist.txt', 'w') as file:
-    file.write('--- Main Label Distribution ---\n')
+    file.write('--- Main Group Distribution ---\n')
     for label_idx, count in main_label_counts.most_common():
         emotion_name = main_labels[label_idx]
         percentage = (count / total_main_labels) * 100
@@ -96,7 +83,8 @@ with open('label_dist.txt', 'r') as file:
 # save data
 dataset_pipeline = {
     'data': grouped_data,
-    'emotion_labels': main_labels
+    'emotion_labels': main_labels,
+    'emotion_groups': emotion_groups
 }
 import pickle
 with open('app/emotion_dataset.pkl', 'wb') as file:

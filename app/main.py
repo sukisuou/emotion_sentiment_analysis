@@ -1,4 +1,4 @@
-# ---------- Part 3 : Model Testing ----------
+# ---------- Part 4 : Model Testing ----------
 import tensorflow as tf
 import numpy as np
 
@@ -17,22 +17,16 @@ def predict(texts):
     return model.serve(texts_arr).numpy()
 
 # ----- test inputs -----
-texts = [
-    "I miss her so much it physically hurts sometimes.",
-    "I'm proud of you, seriously. You worked so hard for this.",
-    "This is fine. Everything is totally fine.",
-    "I don't know whether to laugh or cry anymore.",
-    "I'm really nervous about tomorrow but also kinda excited.",
-    "I can't believe they forgot my birthday again.",
-    "Honestly? That was disgusting and disappointing."
-]
+texts = []
+print("Enter your comment:")
+texts.append(input())
 
 # predict
-print('Analysing comment...')
+print('\nAnalysing comment...')
 predictions = predict(texts)
 
 # show results
-threshold = 0.3     # for sigmoid detection
+threshold = 0.5     # for sigmoid detection
 print('\n>>> Prediction Results <<<\n')
 for text, probs in zip(texts, predictions):
     print('-' * 70)

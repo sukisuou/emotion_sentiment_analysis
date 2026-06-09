@@ -30,7 +30,7 @@ y_train = np.array(y_train, dtype = np.int32)
 y_test = np.array(y_test, dtype = np.int32)
 
 # vectorize text using tf-idf unigram/bigram features
-max_tokens = 8000
+max_tokens = 10000
 tfidf_layer = TextVectorization(
     max_tokens = max_tokens,
     output_mode = 'tf_idf',
@@ -42,9 +42,8 @@ tfidf_layer.adapt(X_train)
 label_counts = y_train.sum(axis = 0)
 total_samples = y_train.shape[0]
 label_counts = np.maximum(label_counts, 1)  # avoid div by 0
-multiplier = 1.2    # strength of positive weights
 
-positive_weights = multiplier * total_samples / (len(emotion_labels) * label_counts)
+positive_weights = total_samples / (len(emotion_labels) * label_counts)
 positive_weights = tf.constant(positive_weights, dtype = tf.float32)
 
 # calculate bce with weighted classes
@@ -89,7 +88,7 @@ model.compile(
         BinaryAccuracy(name = 'accuracy'),
         Precision(name = 'precision'),
         Recall(name = 'recall'),
-        F1Score(average = 'micro', name = 'f1_score')
+        F1Score(average = 'micro', threshold = 0.5, name = 'f1_score')
     ]
 )
 
@@ -108,7 +107,7 @@ history = model.fit(
     X_train, y_train,
     epochs = 25,
     batch_size = 32,
-    verbose = False,
+    verbose = True,
     validation_data = (X_test, y_test),
     callbacks = [early_stopping]
 )
