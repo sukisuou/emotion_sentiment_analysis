@@ -1,4 +1,7 @@
 # NLP PROJECT : Emotion Sentiment Analysis
+## Title: 
+Multilabel Emotion Detection using TF-IDF & MLP Neural Network
+Dataset used: GoEmotion by Google
 ### Group Members: Adam Idlan, Adam Hakimi, Adam Iskandar
 
 ## Directory:
