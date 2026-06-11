@@ -1,6 +1,7 @@
 # ---------- Part 4 : Model Testing ----------
 import tensorflow as tf
 import numpy as np
+import os
 
 # load the labels from dataset
 import pickle
@@ -17,35 +18,43 @@ def predict(texts):
     return model.serve(texts_arr).numpy()
 
 # ----- test inputs -----
-texts = []
-print("Enter your comment:")
-texts.append(input())
+while True:
+    os.system('cls' if os.name == 'nt' else 'clear')
 
-# predict
-print('\nAnalysing comment...')
-predictions = predict(texts)
+    texts = []
+    print("Enter your comment ('x' to exit):")
+    text = input()
+    if text == "x":
+        print("Bye bye~")
+        break
+    texts.append(text)
 
-# show results
-threshold = 0.5     # for sigmoid detection
-print('\n>>> Prediction Results <<<\n')
-for text, probs in zip(texts, predictions):
-    print('-' * 70)
-    print(text)
-    print('-' * 70)
-    print('Result:')
+    # predict
+    print('\nAnalysing comment...')
+    predictions = predict(texts)
 
-    # check all the possible emotions
-    found_any = False
-    for idx, prob in enumerate(probs):
-        if prob >= threshold:
-            emotion_name = emotion_labels[idx]
-            print(f'   - {emotion_name}: {prob * 100:.2f}%')
-            found_any = True
-    
-    # if none is found, pick the highest
-    if not found_any:
-        highest_idx = np.argmax(probs)
-        emotion_name = emotion_labels[highest_idx]
-        print(f'   - {emotion_name}: {probs[highest_idx] * 100:.2f}% (Highest, below threshold)')
+    # show results
+    threshold = 0.5     # for sigmoid detection
+    print('\n>>> Prediction Results <<<\n')
+    for text, probs in zip(texts, predictions):
+        print('-' * 70)
+        print(text)
+        print('-' * 70)
+        print('Result:')
 
-    print()
+        # check all the possible emotions
+        found_any = False
+        for idx, prob in enumerate(probs):
+            if prob >= threshold:
+                emotion_name = emotion_labels[idx]
+                print(f'   - {emotion_name}: {prob * 100:.2f}%')
+                found_any = True
+        
+        # if none is found, pick the highest
+        if not found_any:
+            highest_idx = np.argmax(probs)
+            emotion_name = emotion_labels[highest_idx]
+            print(f'   - {emotion_name}: {probs[highest_idx] * 100:.2f}% (Highest, below threshold)')
+
+        print('\nPress enter to continue...', end = "")
+        input()
