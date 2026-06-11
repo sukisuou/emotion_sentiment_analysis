@@ -23,7 +23,7 @@ while True:
     os.system('cls' if os.name == 'nt' else 'clear')
 
     texts = []
-    if user_input:
+    if user_input:  # allow user input instead
         print("Enter your comment ('x' to exit):")
         text = input()
         if text == "x":
@@ -31,7 +31,7 @@ while True:
             break
         texts.append(text)
     else:
-        texts = [
+        texts = [   # testcases
             "honestly this is one of the best guides i've read in a while, thanks for taking the time to write it",
             "what the hell is this update, literally nobody asked for this and somehow everything is worse now",
             "am i the only one who doesn't understand what's going on here?",
